@@ -31,10 +31,13 @@ if (!fs.existsSync("./source/file.json")) {
 // 	}
 // }
 // export const {nama, email, noHp} = await contact()
-
-export function simpanContact(nama, email, noHp) {
+function readContact() {
 	const read = fs.readFileSync("source/file.json", "utf-8")
 	const readJ = JSON.parse(read)
+	return readJ
+}
+export function simpanContact(nama, email, noHp) {
+	const readJ = readContact()
 	const duplicat = readJ.find((n) => {
 		return n.nama === nama
 	})
@@ -64,4 +67,40 @@ function writeData(data) {
 	fs.writeFile("source/file.json", JSON.stringify(data), "utf-8", (err) => {
 		if (err) throw (err = "write file tidak berhasil")
 	})
+}
+export function listContact() {
+	const list = readContact()
+	console.log(chalk.bold.bgBlue("List Contacts"))
+	list.forEach((n, i) => {
+		if (!n.email) {
+			console.log(`${i + 1}. ${chalk.bold.red(`${n.nama}--${n.noHp}`)} `)
+		}
+		console.log(
+			`${i + 1}. ${chalk.bold.red(`${n.nama}--${n.email}--${n.noHp}`)} `
+		)
+	})
+}
+export function getContact(nama) {
+	const list = readContact()
+	const [newList] = list.filter((n) => n.nama === nama)
+
+	if (!newList) {
+		console.log(chalk.bold.bgRed(`${nama} tidak terdaftar`))
+		return false
+	}
+	console.log(chalk.bgGreenBright(`${newList.nama}`))
+	console.log(`${newList.noHp}`)
+	if (!!newList.email) {
+		console.log(`${newList.email}`)
+	}
+}
+export function deleteContact(nama) {
+	const list = readContact()
+	const newList = list.filter((n) => n.nama !== nama)
+	if (newList.length === list.length) {
+		console.log(chalk.bold.bgRed(`delete gagal, ${nama} tidak terdaftar`))
+		return false
+	}
+	writeData(newList)
+	console.log(`${chalk.bold.green.inverse(`Sukses delete ${nama} kontak`)}`)
 }
